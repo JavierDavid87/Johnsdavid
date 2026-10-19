@@ -1,120 +1,391 @@
-/* ========== SETTINGS ========== */
-const ADMIN_PASSWORD = "admin123"; // <-- change this!
-const ROLES = ["Student", "Web Developer", "Creative Thinker", "Future Professional"];
 
-/* ========== HELPERS ========== */
-const $ = (s, r = document) => r.querySelector(s);
-const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-function toast(msg) {
-  const t = $("#toast"); t.textContent = msg; t.classList.add("on");
-  setTimeout(() => t.classList.remove("on"), 2200);
+/* =========================================
+   ACADEMIC PORTFOLIO
+   Code-managed files; visitors view/download
+   HTML + CSS + JavaScript only
+========================================= */
+
+/* 1. SETTINGS */
+const ROLES = [
+    "Student",
+    "Web Developer",
+    "Creative Thinker",
+    "Future Professional"
+];
+
+/*
+   2. ADD YOUR FILES HERE.
+
+   Put your actual files inside the matching folders.
+   Then add their paths to this list.
+
+   Supported categories:
+   quiz, long-quiz, midterms, finals, activity, project
+
+   Example:
+   {
+       category: "quiz",
+       name: "Quiz 1",
+       path: "files/quiz/quiz-1.pdf",
+       type: "pdf"
+   }
+*/
+
+const PORTFOLIO_FILES = [
+    // QUIZ
+    // {
+    //     category: "quiz",
+    //     name: "Quiz 1",
+    //     path: "files/quiz/quiz-1.pdf",
+    //     type: "pdf"
+    // },
+    // {
+    //     category: "quiz",
+    //     name: "Quiz Image",
+    //     path: "files/quiz/quiz-image.jpg",
+    //     type: "image"
+    // },
+
+    // LONG QUIZ
+    // {
+    //     category: "long-quiz",
+    //     name: "Long Quiz 1",
+    //     path: "files/long-quiz/long-quiz-1.pdf",
+    //     type: "pdf"
+    // },
+
+    // MIDTERMS
+    // {
+    //     category: "midterms",
+    //     name: "Midterm Examination",
+    //     path: "files/midterms/midterm.pdf",
+    //     type: "pdf"
+    // },
+
+    // FINALS
+    // {
+    //     category: "finals",
+    //     name: "Final Examination",
+    //     path: "files/finals/final-exam.pdf",
+    //     type: "pdf"
+    // },
+
+    // ACTIVITIES
+    // {
+    //     category: "activity",
+    //     name: "Activity 1",
+    //     path: "files/activities/activity-1.jpg",
+    //     type: "image"
+    // },
+
+    // PROJECTS
+    // {
+    //     category: "project",
+    //     name: "Project 1",
+    //     path: "files/projects/project-1.pdf",
+    //     type: "pdf"
+    // }
+];
+
+
+/* 3. HELPERS */
+const $ = (selector, root = document) =>
+    root.querySelector(selector);
+
+const $$ = (selector, root = document) =>
+    [...root.querySelectorAll(selector)];
+
+function toast(message) {
+    const element = $("#toast");
+
+    if (!element) return;
+
+    element.textContent = message;
+    element.classList.add("on");
+
+    setTimeout(() => {
+        element.classList.remove("on");
+    }, 2200);
 }
-$("#yr").textContent = new Date().getFullYear();
 
-/* ========== TYPING TEXT ANIMATION ========== */
-(function typing() {
-  let r = 0, c = 0, del = false;
-  const el = $("#typed");
-  (function tick() {
-    const word = ROLES[r];
-    el.textContent = word.slice(0, del ? --c : ++c);
-    let delay = del ? 50 : 110;
-    if (!del && c === word.length) { del = true; delay = 1400; }
-    else if (del && c === 0) { del = false; r = (r + 1) % ROLES.length; delay = 400; }
-    setTimeout(tick, delay);
-  })();
+const yearElement = $("#yr");
+
+if (yearElement) {
+    yearElement.textContent = new Date().getFullYear();
+}
+
+
+/* 4. TYPING ANIMATION */
+(function typingAnimation() {
+    const element = $("#typed");
+
+    if (!element) return;
+
+    let roleIndex = 0;
+    let characterIndex = 0;
+    let deleting = false;
+
+    function tick() {
+        const word = ROLES[roleIndex];
+
+        if (deleting) {
+            characterIndex--;
+        } else {
+            characterIndex++;
+        }
+
+        element.textContent = word.slice(0, characterIndex);
+
+        let delay = deleting ? 50 : 100;
+
+        if (!deleting && characterIndex === word.length) {
+            deleting = true;
+            delay = 1400;
+        } else if (deleting && characterIndex === 0) {
+            deleting = false;
+            roleIndex = (roleIndex + 1) % ROLES.length;
+            delay = 350;
+        }
+
+        setTimeout(tick, delay);
+    }
+
+    tick();
 })();
 
-/* ========== SCROLL REVEAL ========== */
-const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add("show")), { threshold: .12 });
-$$(".reveal").forEach(el => io.observe(el));
 
-/* ========== MOBILE MENU ========== */
-$("#menuBtn").onclick = () => $("#menu").classList.toggle("open");
-$$("#menu a").forEach(a => a.onclick = () => $("#menu").classList.remove("open"));
+/* 5. SCROLL REVEAL ANIMATION */
+if ("IntersectionObserver" in window) {
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("show");
+                observer.unobserve(entry.target);
+            }
+        });
+    }, {
+        threshold: 0.12
+    });
 
-/* ========== INDEXEDDB (saves pictures/files) ========== */
-let db;
-const open = indexedDB.open("portfolioDB", 1);
-open.onupgradeneeded = e => e.target.result.createObjectStore("files", { keyPath: "id", autoIncrement: true }).createIndex("cat", "cat");
-open.onsuccess = e => { db = e.target.result; render(); loadAvatar(); };
-const store = m => db.transaction("files", m).objectStore("files");
-const getAll = cat => new Promise(res => { store("readonly").index("cat").getAll(cat).onsuccess = e => res(e.target.result); });
+    $$(".reveal").forEach(element => observer.observe(element));
+} else {
+    $$(".reveal").forEach(element => element.classList.add("show"));
+}
 
-/* ========== TABS + RENDER ========== */
-let current = "quiz";
-$$(".tab").forEach(t => t.onclick = () => {
-  $$(".tab").forEach(x => x.classList.remove("active"));
-  t.classList.add("active"); current = t.dataset.cat; render();
+
+/* 6. MOBILE MENU */
+const menuButton = $("#menuBtn");
+const menu = $("#menu");
+
+if (menuButton && menu) {
+    menuButton.addEventListener("click", () => {
+        menu.classList.toggle("open");
+    });
+
+    $$("a", menu).forEach(link => {
+        link.addEventListener("click", () => {
+            menu.classList.remove("open");
+        });
+    });
+}
+
+
+/* 7. FILE ICONS */
+function getFileIcon(filename, type = "") {
+    const extension = (
+        type || filename.split(".").pop()
+    ).toLowerCase();
+
+    const icons = {
+        pdf: "📕",
+        doc: "📘",
+        docx: "📘",
+        xls: "📗",
+        xlsx: "📗",
+        ppt: "📙",
+        pptx: "📙",
+        zip: "🗜️",
+        txt: "📄",
+        mp4: "🎬",
+        mp3: "🎵",
+        image: "🖼️",
+        jpg: "🖼️",
+        jpeg: "🖼️",
+        png: "🖼️",
+        gif: "🖼️",
+        webp: "🖼️"
+    };
+
+    return icons[extension] || "📁";
+}
+
+
+/* 8. CATEGORY TABS */
+let currentCategory = "quiz";
+
+const tabs = $$(".tab");
+
+tabs.forEach(tab => {
+    tab.addEventListener("click", () => {
+        tabs.forEach(item => {
+            item.classList.remove("active");
+            item.setAttribute("aria-selected", "false");
+        });
+
+        tab.classList.add("active");
+        tab.setAttribute("aria-selected", "true");
+
+        currentCategory = tab.dataset.cat;
+
+        renderFiles();
+    });
 });
 
-const size = b => b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
-const icon = n => { const x = n.split(".").pop().toLowerCase();
-  return { pdf: "📕", doc: "📘", docx: "📘", xls: "📗", xlsx: "📗", ppt: "📙", pptx: "📙", zip: "🗜️", txt: "📄", mp4: "🎬", mp3: "🎵" }[x] || "📁"; };
 
-async function render() {
-  if (!db) return;
-  const items = (await getAll(current)).sort((a, b) => b.date - a.date);
-  const grid = $("#grid"); grid.innerHTML = "";
-  $("#empty").style.display = items.length ? "none" : "block";
-  items.forEach((f, i) => {
-    const url = URL.createObjectURL(f.blob);
-    const isImg = f.type.startsWith("image/");
-    const card = document.createElement("div");
-    card.className = "card"; card.style.animationDelay = i * .06 + "s";
-    card.innerHTML = `<div class="thumb">${isImg ? `<img src="${url}" alt="">` : icon(f.name)}</div>
-      <div class="meta"><div class="name"></div><small>${size(f.blob.size)} · ${new Date(f.date).toLocaleDateString()}</small>
-      <div class="row"><a href="${url}" download="${f.name.replace(/"/g, "")}">Download</a><button class="del">Delete</button></div></div>`;
-    $(".name", card).textContent = f.name;
-    $(".thumb", card).onclick = () => isImg ? openLB(url) : window.open(url, "_blank");
-    $(".del", card).onclick = () => { if (confirm("Delete this file?")) { store("readwrite").delete(f.id).onsuccess = () => { render(); toast("Deleted"); }; } };
-    grid.appendChild(card);
-  });
+/* 9. RENDER FILES
+   No upload, delete, or edit controls are created.
+*/
+function renderFiles() {
+    const grid = $("#grid");
+    const empty = $("#empty");
+
+    if (!grid) return;
+
+    grid.replaceChildren();
+
+    const items = PORTFOLIO_FILES.filter(file =>
+        file.category === currentCategory
+    );
+
+    if (empty) {
+        empty.style.display = items.length ? "none" : "block";
+    }
+
+    items.forEach((file, index) => {
+        const card = document.createElement("article");
+
+        card.className = "card";
+        card.style.animationDelay = `${index * 0.06}s`;
+
+        const thumbnail = document.createElement("div");
+        thumbnail.className = "thumb";
+
+        const isImage =
+            file.type === "image" ||
+            /\.(png|jpe?g|gif|webp|bmp|svg)$/i.test(file.path);
+
+        if (isImage) {
+            const image = document.createElement("img");
+
+            image.src = file.path;
+            image.alt = file.name;
+            image.loading = "lazy";
+
+            image.addEventListener("error", () => {
+                thumbnail.textContent = "🖼️";
+            }, { once: true });
+
+            thumbnail.appendChild(image);
+
+            thumbnail.addEventListener("click", () => {
+                openLightbox(file.path);
+            });
+        } else {
+            thumbnail.textContent = getFileIcon(file.name, file.type);
+
+            thumbnail.addEventListener("click", () => {
+                window.open(file.path, "_blank", "noopener,noreferrer");
+            });
+        }
+
+        const meta = document.createElement("div");
+        meta.className = "meta";
+
+        const name = document.createElement("div");
+        name.className = "name";
+        name.textContent = file.name;
+
+        const details = document.createElement("small");
+        details.textContent = (file.type || "FILE").toUpperCase();
+
+        const actions = document.createElement("div");
+        actions.className = "row";
+
+        const viewLink = document.createElement("a");
+        viewLink.href = file.path;
+        viewLink.target = "_blank";
+        viewLink.rel = "noopener noreferrer";
+        viewLink.textContent = "View";
+
+        const downloadLink = document.createElement("a");
+        downloadLink.href = file.path;
+        downloadLink.setAttribute("download", "");
+        downloadLink.textContent = "Download";
+
+        actions.append(viewLink, downloadLink);
+        meta.append(name, details, actions);
+        card.append(thumbnail, meta);
+
+        grid.appendChild(card);
+    });
 }
 
-/* ========== UPLOAD (multiple) ========== */
-async function saveFiles(files) {
-  if (!document.body.classList.contains("admin")) return;
-  const list = [...files]; if (!list.length) return;
-  const tx = db.transaction("files", "readwrite"), st = tx.objectStore("files");
-  list.forEach(f => st.add({ cat: current, name: f.name, type: f.type || "application/octet-stream", blob: f, date: Date.now() }));
-  tx.oncomplete = () => { render(); toast(list.length + " file(s) uploaded ✔"); };
+
+/* 10. LIGHTBOX */
+function openLightbox(source) {
+    const lightbox = $("#lightbox");
+    const image = $("#lbImg");
+
+    if (!lightbox || !image) return;
+
+    image.src = source;
+    lightbox.classList.add("on");
+    lightbox.setAttribute("aria-hidden", "false");
 }
-$("#fileInput").onchange = e => { saveFiles(e.target.files); e.target.value = ""; };
-const dz = $("#dropzone");
-["dragenter", "dragover"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add("over"); }));
-["dragleave", "drop"].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove("over"); }));
-dz.addEventListener("drop", e => saveFiles(e.dataTransfer.files));
 
-/* ========== LIGHTBOX ========== */
-function openLB(src) { $("#lbImg").src = src; $("#lightbox").classList.add("on"); }
-$("#lightbox").onclick = () => $("#lightbox").classList.remove("on");
+const lightbox = $("#lightbox");
 
-/* ========== ADMIN MODE (only you can edit/upload) ========== */
-function setAdmin(on) {
-  document.body.classList.toggle("admin", on);
-  $$("[data-key]").forEach(el => el.contentEditable = on);
-  $("#adminBtn").textContent = on ? "🔓 Logout" : "🔒 Admin";
+if (lightbox) {
+    lightbox.addEventListener("click", () => {
+        lightbox.classList.remove("on");
+        lightbox.setAttribute("aria-hidden", "true");
+
+        const image = $("#lbImg");
+        if (image) image.src = "";
+    });
 }
-$("#adminBtn").onclick = () => {
-  if (document.body.classList.contains("admin")) { setAdmin(false); toast("Logged out"); return; }
-  const p = prompt("Enter admin password:");
-  if (p === ADMIN_PASSWORD) { setAdmin(true); toast("Admin mode ON"); } else if (p !== null) toast("Wrong password");
-};
 
-/* ========== EDITABLE TEXT (saved) ========== */
-$$("[data-key]").forEach(el => {
-  const saved = localStorage.getItem("pf_" + el.dataset.key);
-  if (saved) el.textContent = saved;
-  el.addEventListener("blur", () => { localStorage.setItem("pf_" + el.dataset.key, el.textContent.trim()); toast("Saved ✔"); });
+
+/* 11. PROFILE PHOTO
+   Change the image path in your HTML, for example:
+   <img id="avatarImg" src="assets/profile.jpg" alt="Profile photo">
+*/
+
+
+/* 12. VISITOR-ONLY MODE
+   Remove old admin/edit/upload controls if present.
+   All portfolio text is read-only.
+*/
+document.body.classList.remove("admin");
+
+$$("[data-key]").forEach(element => {
+    element.contentEditable = "false";
+    element.removeAttribute("contenteditable");
 });
 
-/* ========== PROFILE PHOTO ========== */
-function loadAvatar() {
-  const r = store("readonly").get(-1);
-  r.onsuccess = () => { if (r.result) $("#avatarImg").src = URL.createObjectURL(r.result.blob); };
-}
-$("#avatarInput").onchange = e => {
-  const f = e.target.files[0]; if (!f) return;
-  store("readwrite").put({ id: -1, cat: "_avatar", name: "avatar", type: f.type, blob: f, date: Date.now() }).onsuccess = () => { loadAvatar(); toast("Photo updated ✔"); };
-};
+[
+    "#adminBtn",
+    "#fileInput",
+    "#avatarInput",
+    "#dropzone",
+    "#upload-form",
+    ".upload-panel",
+    ".admin-controls",
+    ".edit-controls"
+].forEach(selector => {
+    $$(selector).forEach(element => element.remove());
+});
+
+
+/* 13. INITIALIZE */
+renderFiles();
