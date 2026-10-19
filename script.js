@@ -26,8 +26,8 @@ const ROLES = [
    {
        category: "quiz",
        name: "Quiz 1",
-       path: ",QUIZ1.JPEG.jpg",
-       type: "pdf"
+       path: "QUIZ1.JPEG.jpg",
+       type: "image"
    }
 */
 
