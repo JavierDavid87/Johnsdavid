@@ -32,60 +32,51 @@ const ROLES = [
 */
 
 const PORTFOLIO_FILES = [
-    // QUIZ
-    // {
-    //     category: "quiz",
-    //     name: "Quiz 1",
-    //     path: "files/quiz/quiz-1.pdf",
-    //     type: "pdf"
-    // },
-    // {
-    //     category: "quiz",
-    //     name: "Quiz Image",
-    //     path: "files/quiz/quiz-image.jpg",
-    //     type: "image"
-    // },
-
-    // LONG QUIZ
-    // {
-    //     category: "long-quiz",
-    //     name: "Long Quiz 1",
-    //     path: "files/long-quiz/long-quiz-1.pdf",
-    //     type: "pdf"
-    // },
-
-    // MIDTERMS
-    // {
-    //     category: "midterms",
-    //     name: "Midterm Examination",
-    //     path: "files/midterms/midterm.pdf",
-    //     type: "pdf"
-    // },
-
-    // FINALS
-    // {
-    //     category: "finals",
-    //     name: "Final Examination",
-    //     path: "files/finals/final-exam.pdf",
-    //     type: "pdf"
-    // },
-
-    // ACTIVITIES
-    // {
-    //     category: "activity",
-    //     name: "Activity 1",
-    //     path: "files/activities/activity-1.jpg",
-    //     type: "image"
-    // },
-
-    // PROJECTS
-    // {
-    //     category: "project",
-    //     name: "Project 1",
-    //     path: "files/projects/project-1.pdf",
-    //     type: "pdf"
-    // }
+    {
+        category: "quiz",
+        name: "Quiz 1",
+        path: "Quiz1.JPEG.jpg,
+        type: "image"
+    },
+    {
+        category: "quiz",
+        name: "Quiz 2",
+        path: "files/quiz/quiz-2.pdf",
+        type: "pdf"
+    },
+    {
+        category: "long-quiz",
+        name: "Long Quiz 1",
+        path: "files/long-quiz/long-quiz-1.pdf",
+        type: "pdf"
+    },
+    {
+        category: "midterms",
+        name: "Midterm Examination",
+        path: "files/midterms/midterm.pdf",
+        type: "pdf"
+    },
+    {
+        category: "finals",
+        name: "Final Examination",
+        path: "files/finals/final-exam.pdf",
+        type: "pdf"
+    },
+    {
+        category: "activity",
+        name: "Activity 1",
+        path: "files/activities/activity-1.jpg",
+        type: "image"
+    },
+    {
+        category: "project",
+        name: "Academic Project",
+        path: "files/projects/project-1.pdf",
+        type: "pdf"
+    }
 ];
+
+
 
 
 /* 3. HELPERS */
